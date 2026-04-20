@@ -1,0 +1,302 @@
+{
+  "info": {
+    "name": "Corvit-Demo E-Commerce API",
+    "description": "COD e-commerce API. Set `baseUrl` in the environment. Login as admin or customer first — the token is auto-saved to `authToken` for subsequent requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "c0d1f001-0000-4000-8000-000000000001"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "authToken", "value": "", "type": "string" },
+    { "key": "productId", "value": "", "type": "string" },
+    { "key": "orderId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Signup (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) { pm.collectionVariables.set('authToken', res.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test.user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/signup", "host": ["{{baseUrl}}"], "path": ["users", "signup"] }
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) { pm.collectionVariables.set('authToken', res.token); }",
+                  "pm.test('is admin', () => pm.expect(res.isAdmin).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@eapp.dev\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/login", "host": ["{{baseUrl}}"], "path": ["users", "login"] }
+          }
+        },
+        {
+          "name": "Login (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) { pm.collectionVariables.set('authToken', res.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ava@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/login", "host": ["{{baseUrl}}"], "path": ["users", "login"] }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/users/profile", "host": ["{{baseUrl}}"], "path": ["users", "profile"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products (paginated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.items && res.items[0]) { pm.collectionVariables.set('productId', res.items[0]._id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?page=1&limit=8",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "8" },
+                { "key": "category", "value": "Dresses", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Product (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res._id) { pm.collectionVariables.set('productId', res._id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Linen Shirt\",\n  \"price\": 79,\n  \"description\": \"Lightweight pre-washed linen shirt.\",\n  \"category\": \"Tops\",\n  \"image\": \"https://images.unsplash.com/photo-1562157873-818bc0726f68?w=800\",\n  \"countInStock\": 25\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Update Product (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 89,\n  \"countInStock\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Product (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Place Order (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res._id) { pm.collectionVariables.set('orderId', res._id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderItems\": [\n    { \"product\": \"{{productId}}\", \"qty\": 1 }\n  ],\n  \"shippingAddress\": {\n    \"fullName\": \"Ava Thompson\",\n    \"address\": \"14 Mercer Street\",\n    \"city\": \"New York\",\n    \"postalCode\": \"10013\",\n    \"country\": \"USA\",\n    \"phone\": \"+1 212 555 0142\"\n  }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "description": "COD only. Admins are rejected with 403."
+          }
+        },
+        {
+          "name": "My Orders (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/orders/mine", "host": ["{{baseUrl}}"], "path": ["orders", "mine"] }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}"]
+            },
+            "description": "Customer can only read their own orders. Admin can read any."
+          }
+        },
+        {
+          "name": "List All Orders (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Delivered (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/deliver",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "deliver"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
